@@ -29,8 +29,8 @@ public sealed class MonoTorrentStreamModelResolver : IVideoStreamModelResolver,
     {
         _torrentEngine = torrentEngine;
         _torrentUrl = torrentUrl;
-        var folder = parsedResults.First(x => x.Category == Element.ElementCategory.ElementAnimeTitle).Value;
-        _saveDirectory = Path.Combine(saveDirectory, folder);
+        var folder = parsedResults.FirstOrDefault(x => x.Category == Element.ElementCategory.ElementAnimeTitle)?.Value;
+        _saveDirectory = string.IsNullOrEmpty(folder) ? saveDirectory : Path.Combine(saveDirectory, folder);
     }
 
     public MonoTorrentStreamModelResolver(ITorrentEngine torrentEngine,

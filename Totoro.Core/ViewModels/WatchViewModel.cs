@@ -635,7 +635,7 @@ public partial class WatchViewModel : NavigatableViewModel
 
         _videoStreamResolver = useDebrid
             ? await _videoStreamResolverFactory.CreateDebridStreamResolver(torrent.Magnet)
-            : _videoStreamResolverFactory.CreateMonoTorrentStreamResolver(parsedResult, torrent.Link);
+            : _videoStreamResolverFactory.CreateMonoTorrentStreamResolver(parsedResult, torrent.Link ?? torrent.Magnet);
 
         ObserveDownload();
 
