@@ -1,0 +1,48 @@
+name: "Build and publish"
+
+on:
+  push:
+    tags:
+    - 'v*'
+
+env:
+  INSTALLER_PATH: 'Totoro.Installer/Totoro.Installer.wixproj'
+
+jobs:
+    deploy:
+        name: 'Build and deploy'
+        runs-on: 'windows-latest'
+        steps:
+        -   name: 'Checkout'
+            uses: actions/checkout@v2
+  
+        -   name: 'Install dotnet'
+            uses: actions/setup-dotnet@v1
+            with:
+                dotnet-version: '7.0'
+        
+        -   name: 'Add msbuild to PATH'
+            uses: microsoft/setup-msbuild@v1.1
+        
+        -   name: 'Get version'
+            id: version
+            uses: battila7/get-version-action@v2
+
+        -   name: 'Build MSI'
+            run: msbuild ${{ env.INSTALLER_PATH }} /property:Configuration=Release /property:BuildVersion=${{ steps.version.outputs.version-without-v }}
+  
+        -   name: 'Create release'
+            id: create_release
+            uses: actions/create-release@v1
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+                tag_name: ${{ steps.version.outputs.version-without-v }}
+                release_name: ${{ steps.version.outputs.version-without-v }}
+
+        -   name: 'Add MSI to release'
+            uses: csexton/release-asset-action@v2
+            with:
+                github-token: ${{ secrets.GITHUB_TOKEN }}
+                pattern: Totoro.Installer/bin/Release/en-us/Totoro-Release.msi
+                release-url: ${{ steps.create_release.outputs.upload_url }}
